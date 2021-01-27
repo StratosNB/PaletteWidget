@@ -1,6 +1,8 @@
 #include "PaletteWidget.h"
 #include "QPainter.h"
-#include<QDebug>
+#include <QDebug>
+#include <QMouseEvent>
+
 
 
 PaletteWidget::PaletteWidget(QWidget *parent)
@@ -8,8 +10,15 @@ PaletteWidget::PaletteWidget(QWidget *parent)
 {
     ui.setupUi(this);
     resize(800, 400);
+    setMouseTracking(true);
+
+    qApp->installEventFilter(this);
 
     paletteWidthTotal = 0;
+
+    mousePosX = 0;
+    mousePosY = 0;
+
 }
 
 
@@ -17,8 +26,10 @@ void PaletteWidget::paintEvent(QPaintEvent * pxEvent)
 {
     QPainter xPainter(this);
 
+
     renderPalette(&xPainter);
-    
+    renderRGBLabels(&xPainter);
+
 }
 
 
@@ -34,28 +45,58 @@ void PaletteWidget::renderPalette(QPainter * pxPainter)
     int y1 = calcPosition(widgetHeight, 0, 0.3);
 
     int w = 1;
-    int h = y1-y;
+    int h = y1 - y;
 
     paletteWidthTotal = widgetWidth - x;
 
     for (int i = 50; i <= paletteWidthTotal; i++)
     {
 
-        QRect tmp(i, y, w, h);
-        pxPainter->drawRect(tmp);
+        QRect rect(i, y, w, h);
+        pxPainter->drawRect(rect);
 
         double proportion = calcProportion(i, 50, paletteWidthTotal);
 
         QString k = QString::number(i);
         QString p = QString::number(proportion);
 
-        qDebug() << k << " " << p;
+        //qDebug() << k << " " << p;
 
-        pxPainter->fillRect(tmp, getColor(proportion));
-    }  
+        pxPainter->fillRect(rect, getColor(proportion));
+    }
 
 
     pxPainter->restore();
+}
+
+void PaletteWidget::renderRGBLabels(QPainter * pxPainter)
+{
+    pxPainter->save();
+
+    QRect rgbRect(50, 300, 130, 100);
+    QRect rgbColorRect(175, 300, 25, 25);
+
+    QPixmap pixmap(this->size());
+    this->render(&pixmap);
+    QImage img(pixmap.toImage());
+    QRgb pix = img.pixel(mousePosX, mousePosY);
+
+    QString r = QString::number(qRed(pix));
+    QString g = QString::number(qGreen(pix));
+    QString b = QString::number(qBlue(pix));
+
+    pxPainter->fillRect(rgbColorRect, QColor(qRed(pix), qGreen(pix), qBlue(pix)));
+
+    QString rgb = "RGB(" + r + ", " + g + ", " + b + ")";
+    qDebug() << rgb ;
+
+    pxPainter->drawText(rgbRect, rgb);
+    pxPainter->drawRect(rgbColorRect);
+
+    update();
+    pxPainter->restore();
+
+
 }
 
 QColor PaletteWidget::getColor(double x)
@@ -104,4 +145,26 @@ QColor PaletteWidget::interpolate(QColor a, QColor b, float x)
     int newBlue = (gBlue - sBlue) * x + sBlue;
 
     return QColor(newRed, newGreen, newBlue);
+}
+
+//void PaletteWidget::mouseMoveEvent(QMouseEvent *event) {
+//    qDebug() << event->pos();
+//}
+
+
+bool PaletteWidget::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::MouseMove)
+    {
+
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+
+        mousePosX = mouseEvent->pos().x();
+        mousePosY = mouseEvent->pos().y();
+
+        statusBar()->showMessage(QString("Mouse position (%1,%2)").arg(mousePosX).arg(mousePosY));
+
+
+    }
+    return false;
 }

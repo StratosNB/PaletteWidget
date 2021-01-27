@@ -14,6 +14,9 @@ private:
     Ui::PaletteWidgetClass ui;
     void paintEvent(QPaintEvent * pxEvent);
     void PaletteWidget::renderPalette(QPainter * pxPainter);
+    void PaletteWidget::renderRGBLabels(QPainter * pxPainter);
+    //void PaletteWidget::mouseMoveEvent(QMouseEvent *event);
+    bool PaletteWidget::eventFilter(QObject *obj, QEvent *event);
 
     QColor interpolate(QColor b, QColor a, float x);
 
@@ -29,5 +32,8 @@ private:
 
     int paletteWidthTotal;
     int paletteHeightTotal;
+
+    int mousePosX;
+    int mousePosY;
 
 };
