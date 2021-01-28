@@ -14,7 +14,9 @@ private:
     Ui::PaletteWidgetClass ui;
     void paintEvent(QPaintEvent * pxEvent);
     void PaletteWidget::renderPalette(QPainter * pxPainter);
-    void PaletteWidget::renderRGBLabels(QPainter * pxPainter);
+    void PaletteWidget::renderHoverRGBLabels(QPainter * pxPainter);
+    void PaletteWidget::renderAddRGBLabels(QPainter * pxPainter);
+
     //void PaletteWidget::mouseMoveEvent(QMouseEvent *event);
     bool PaletteWidget::eventFilter(QObject *obj, QEvent *event);
 
@@ -35,5 +37,9 @@ private:
 
     int mousePosX;
     int mousePosY;
+
+    QLineEdit *rInputEdit;
+    QLineEdit *gInputEdit;
+    QLineEdit *bInputEdit;
 
 };
